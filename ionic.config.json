@@ -1,0 +1,7 @@
+{
+  "name": "Week43_3rdPartyAPI",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
