@@ -1,8 +1,13 @@
-import { Component } from '@angular/core';
-import {search} from "ionicons/icons";
+import {Component} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {firstValueFrom} from "rxjs";
 import {FormControl} from "@angular/forms";
+import {
+  Address,
+  AddressAPIJsonResponseModel,
+  CountriesAPIJsonResponseModel,
+  CurrencyConverterAPIJsonResponseModel
+} from "../models";
 
 @Component({
   selector: 'app-home',
@@ -12,96 +17,54 @@ import {FormControl} from "@angular/forms";
 export class HomePage {
   results: Address[] = [];
   addressField = new FormControl('');
+  convertedCurrencyCode: string = "";
+  convertedCurrencyValue: number = 0;
+  salesPrice: number = 100;
 
   constructor(private http: HttpClient) {
     this.http = http;
   }
+
   async handleSearchForAddress() {
     if (this.addressField.value?.length! < 3) return;
-    const address = "https://api.geoapify.com/v1/geocode/autocomplete?";
+    const baseUrl = "https://api.geoapify.com/v1/geocode/autocomplete?";
     const params: any = {
       text: this.addressField.value,
       format: "json",
       apiKey: "9fccd0ed6f96423fb3863c334f2c0138"
     }
-    const call = this.http.get<AddressAPIJsonResponseModel>(address, {params: params});
+    const call = this.http.get<AddressAPIJsonResponseModel>(baseUrl, {params: params});
     const result = await firstValueFrom<AddressAPIJsonResponseModel>(call);
     this.results = result.results;
+
+    if (this.results.length == 1) {
+      this.handleConvertCurrencies(result.results[0])
+    }
+  }
+
+  async handleFindCurrency(address: Address) {
+    const baseUrl = "https://restcountries.com/v3.1/alpha/";
+    const countryCode = address.country_code;
+
+    const call = this.http.get<CountriesAPIJsonResponseModel[]>(baseUrl + countryCode);
+    const result = await firstValueFrom<CountriesAPIJsonResponseModel[]>(call);
+    return Object.keys(result[0].currencies)[0];
+  }
+
+  async handleConvertCurrencies(address: Address) {
+    const baseUrl = "https://api.freecurrencyapi.com/v1/latest";
+    const params : any = {
+      base_currency: "DKK",
+      currencies: await this.handleFindCurrency(address),
+      apikey: "fca_live_kYEaRX8Cis1mBa4RncUr9YvZBiXT1XTyoS2ShPD6"
+    };
+
+    const call = this.http.get<CurrencyConverterAPIJsonResponseModel>(baseUrl, {params: params});
+    const result = await firstValueFrom<CurrencyConverterAPIJsonResponseModel>(call);
+
+    this.convertedCurrencyCode = Object.keys(result.data)[0];
+    this.convertedCurrencyValue = Number.parseFloat(Object.values(result.data)[0] + "") * this.salesPrice;
   }
 }
 
-export interface AddressAPIJsonResponseModel {
-  results: Address[]
-}
-
-export interface Address {
-  datasource: Datasource
-  name?: string
-  country: string
-  country_code: string
-  state: string
-  county?: string
-  city?: string
-  hamlet?: string
-  lon: number
-  lat: number
-  suburb?: string
-  formatted: string
-  address_line1: string
-  address_line2: string
-  category: string
-  timezone: Timezone
-  plus_code: string
-  result_type: string
-  rank: Rank
-  place_id: string
-  bbox: Bbox
-  region?: string
-  plus_code_short?: string
-  postcode?: string
-  village?: string
-  state_code?: string
-  county_code?: string
-}
-
-export interface Datasource {
-  sourcename: string
-  attribution: string
-  license: string
-  url: string
-}
-
-export interface Timezone {
-  name: string
-  offset_STD: string
-  offset_STD_seconds: number
-  offset_DST: string
-  offset_DST_seconds: number
-  abbreviation_STD: string
-  abbreviation_DST: string
-}
-
-export interface Rank {
-  importance: number
-  confidence: number
-  confidence_city_level?: number
-  match_type: string
-}
-
-export interface Bbox {
-  lon1: number
-  lat1: number
-  lon2: number
-  lat2: number
-}
-
-export interface Query {
-  text: string
-  parsed: Parsed
-}
-
-export interface Parsed {
-  city: string
-  expected_type: string
-}
 

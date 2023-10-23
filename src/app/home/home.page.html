@@ -7,9 +7,21 @@
 </ion-header>
 
 <ion-content>
+  <ion-item>
   <h2>Enter address here</h2>
+  </ion-item>
+  <ion-item>
   <input list="address" [formControl]="addressField" (input)="handleSearchForAddress()">
   <datalist id="address">
-    <option *ngFor="let result of results">{{result.formatted}}</option>
+    <option *ngFor="let result of results" [value]="result.formatted"></option>
   </datalist>
+  </ion-item>
+
+  <ion-item>
+    Sales price in DKK: {{salesPrice}}
+  </ion-item>
+
+  <ion-item *ngIf="convertedCurrencyCode">
+    Sales price in {{convertedCurrencyCode}}: {{convertedCurrencyValue}}
+  </ion-item>
 </ion-content>
