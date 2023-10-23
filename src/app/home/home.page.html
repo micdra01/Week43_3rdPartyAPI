@@ -1,20 +1,15 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Blank
+      Week 43 - 3rd party API
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
+<ion-content>
+  <h2>Enter address here</h2>
+  <input list="address" [formControl]="addressField" (input)="handleSearchForAddress()">
+  <datalist id="address">
+    <option *ngFor="let result of results">{{result.formatted}}</option>
+  </datalist>
 </ion-content>
