@@ -27,11 +27,9 @@ export class HomePage {
 
   async handleSearchForAddress() {
     if (this.addressField.value?.length! < 3) return;
-    const baseUrl = "https://api.geoapify.com/v1/geocode/autocomplete?";
+    const baseUrl = "http://localhost:5000/api/address";
     const params: any = {
       text: this.addressField.value,
-      format: "json",
-      apiKey: "9fccd0ed6f96423fb3863c334f2c0138"
     }
     const call = this.http.get<AddressAPIJsonResponseModel>(baseUrl, {params: params});
     const result = await firstValueFrom<AddressAPIJsonResponseModel>(call);
